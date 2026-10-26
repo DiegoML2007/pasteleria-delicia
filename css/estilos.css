@@ -1,0 +1,19 @@
+:root {
+  /* Color principal de la marca Pastelería (Frambuesa) */
+  --bs-primary-base: #b8325a;
+  --bs-primary-bg: #b8325a;
+  --bs-primary-fg: #8f2145;
+  --bs-primary-bg-subtle: #fbe3e8;
+  --bs-primary-contrast: #ffffff;
+
+  --bs-body-font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+.card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
