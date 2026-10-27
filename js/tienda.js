@@ -1,25 +1,32 @@
-import { Drawer } from "https://cdn.jsdelivr.net/npm/bootstrap@6.0.0-alpha.1/dist/js/bootstrap.bundle.min.js";
+import { Toast } from "https://cdn.jsdelivr.net/npm/bootstrap@6.0.0-alpha.1/dist/js/bootstrap.bundle.min.js";
 
-// Datos de catálogo
+// Lista de datos para relacionar con los botones data-id del HTML
 const productos = [
-  { id: 1, nombre: "Torta de Chocolate", precio: 45.00, categoria: "Tortas" },
-  { id: 2, nombre: "Pan de Yema (6 un)", precio: 8.50, categoria: "Panes" },
-  { id: 3, nombre: "Caja de Alfajores", precio: 15.00, categoria: "Dulces" },
-  { id: 4, nombre: "Empanada de Carne", precio: 6.00, categoria: "Salados" },
+  { id: 1, nombre: "Torta de Chocolate", precio: 45.00 },
+  { id: 2, nombre: "Pan de Yema (6 un)", precio: 8.50 },
+  { id: 3, nombre: "Caja de Alfajores", precio: 15.00 },
+  { id: 4, nombre: "Empanada de Carne", precio: 6.00 },
+  { id: 5, nombre: "Pan con Chicharrón", precio: 18.00 },
+  { id: 6, nombre: "Ensalada César con Pollo", precio: 22.00 },
+  { id: 7, nombre: "Pastel de Acelga", precio: 12.00 },
+  { id: 8, nombre: "Sandwich Triple", precio: 9.50 }
 ];
 
-// Funciones Flecha
+// Funciones Auxiliares (Semana 10)
 const soles = (monto) => `S/ ${monto.toFixed(2)}`;
 const sumar = (...numeros) => numeros.reduce((a, n) => a + n, 0);
 
-// Función recursiva para contar ítems
+// REQUERIMIENTO 2: Función flecha para aplicar descuento
+const aplicarDescuento = (total, porcentaje = 10) => total * (porcentaje / 100);
+
+// Función recursiva
 function contarUnidades(lista) {
   if (lista.length === 0) return 0;
   const [primero, ...resto] = lista;
   return primero.cantidad + contarUnidades(resto);
 }
 
-// Closure para el estado privado del carrito
+// Closure del Carrito
 function crearCarrito() {
   let items = [];
 
@@ -32,6 +39,7 @@ function crearCarrito() {
         items.push({ ...producto, cantidad });
       }
       actualizarInterfaz();
+      mostrarToast(`¡Agregado!: ${producto.nombre}`);
     },
     obtenerItems: () => items,
     subtotal: () => sumar(...items.map(it => it.precio * it.cantidad)),
@@ -41,46 +49,53 @@ function crearCarrito() {
 
 const miCarrito = crearCarrito();
 
-// Renderizado del catálogo
-function renderizarProductos() {
-  const contenedor = document.getElementById("contenedorProductos");
-  contenedor.innerHTML = productos.map(prod => `
-    <div class="col">
-      <article class="card h-100">
-        <div class="card-body d-flex flex-column justify-content-between">
-          <div>
-            <span class="badge theme-primary mb-2">${prod.categoria}</span>
-            <h5 class="card-title fw-bold">${prod.nombre}</h5>
-            <p class="fg-secondary fs-lg font-monospace">${soles(prod.precio)}</p>
-          </div>
-          <button class="btn btn-solid theme-primary w-100 btn-agregar" data-id="${prod.id}">
-            Agregar al Carrito
-          </button>
-        </div>
-      </article>
-    </div>
-  `).join('');
+// REQUERIMIENTO 4: Disparar el Toast
+function mostrarToast(mensaje) {
+  const toastElement = document.getElementById("toastAviso");
+  document.getElementById("toastMensaje").textContent = mensaje;
+  const toast = Toast.getOrCreateInstance(toastElement);
+  toast.show();
+}
 
-  // Eventos de botones
-  contenedor.querySelectorAll(".btn-agregar").forEach(btn => {
+// Asignar los eventos de clic a cada botón del HTML
+function inicializarBotones() {
+  document.querySelectorAll(".btn-agregar").forEach(btn => {
     btn.addEventListener("click", (e) => {
       const id = Number(e.target.dataset.id);
       const prod = productos.find(p => p.id === id);
-      miCarrito.agregar(prod);
+      if (prod) {
+        miCarrito.agregar(prod);
+      }
     });
   });
 }
 
-// Actualizar DOM del Carrito
+// Actualizar la interfaz del carrito y calcular el descuento si subtotal > 100
 function actualizarInterfaz() {
   const listaUI = document.getElementById("listaCarrito");
   const contadorUI = document.getElementById("badgeContador");
+  const subtotalUI = document.getElementById("subtotalCarrito");
+  const descuentoUI = document.getElementById("montoDescuento");
   const totalUI = document.getElementById("totalCarrito");
+  const boxDescuento = document.getElementById("boxDescuento");
 
   const items = miCarrito.obtenerItems();
+  const subtotal = miCarrito.subtotal();
   
+  let descuento = 0;
+  if (subtotal > 100) {
+    descuento = aplicarDescuento(subtotal, 10);
+    boxDescuento.style.display = "flex";
+    descuentoUI.textContent = `- ${soles(descuento)}`;
+  } else {
+    boxDescuento.style.display = "none";
+  }
+
+  const totalFinal = subtotal - descuento;
+
   contadorUI.textContent = miCarrito.unidades();
-  totalUI.textContent = soles(miCarrito.subtotal());
+  subtotalUI.textContent = soles(subtotal);
+  totalUI.textContent = soles(totalFinal);
 
   listaUI.innerHTML = items.map(item => `
     <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -93,7 +108,6 @@ function actualizarInterfaz() {
   `).join('');
 }
 
-// Inicialización
 document.addEventListener("DOMContentLoaded", () => {
-  renderizarProductos();
+  inicializarBotones();
 });

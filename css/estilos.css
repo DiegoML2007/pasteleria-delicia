@@ -1,5 +1,5 @@
 :root {
-  /* Color principal de la marca Pastelería (Frambuesa) */
+  /* Cambia la paleta editando solo las variables --bs-primary-* */
   --bs-primary-base: #b8325a;
   --bs-primary-bg: #b8325a;
   --bs-primary-fg: #8f2145;
@@ -16,4 +16,9 @@
 .card:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.card-img-top {
+  height: 180px;
+  object-fit: cover;
 }
